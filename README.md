@@ -69,12 +69,20 @@ docker compose up -d
 
 ## ⚠️ Важно
 
-* Все конфиги Mosquitto уже лежат в `data_mosquitto/`
-* При необходимости отредактируй `mosquitto.conf`
+* `docker-compose.yml` поднимает следующие контейнеры:
+
+  * MQTT брокер (Mosquitto)
+  * Home Assistant
+  * Portainer (UI для управления Docker)
+
+* При необходимости отредактируй перед запуском:
+
+  * `docker-compose.yml` (порты, IP, устройства)
+  * `data_mosquitto/config/mosquitto.conf` (MQTT настройки)
+  * сертификаты в `data_mosquitto/certs/`
 
 ---
 
 ## ✅ Готово
 
 MQTT-брокер запущен и готов для использования с Home Assistant и Hisense TV.
-
