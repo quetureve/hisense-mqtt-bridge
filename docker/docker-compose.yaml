@@ -1,0 +1,60 @@
+networks:
+ netlemp:
+   name: mylan
+   driver: bridge
+   driver_opts:
+    com.docker.network.bridge.name: br-mylan
+   ipam:
+    config:
+     - subnet: ${IP_ADR:-172.100.0}.0/24
+       gateway: ${IP_ADR:-172.100.0}.1
+
+services:
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    environment:
+      - TZ=Europe/Luxembourg
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data_portainer:/data
+    ports:
+      - 9443:9443
+    restart: always
+    networks:
+     netlemp:
+      ipv4_address: ${IP_ADR:-172.100.0}.2
+
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+    - ./data_homeassistant:/config
+    - /etc/localtime:/etc/localtime:ro
+    - /run/dbus:/run/dbus:ro
+    restart: always
+    privileged: true
+    networks:
+     netlemp:
+      ipv4_address: ${IP_ADR:-172.100.0}.3
+    ports:
+    - 8123:8123
+    devices:
+    - /dev/ttyUSB0:/dev/ttyUSB0:rwm
+
+  mqtt:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    restart: unless-stopped
+    volumes:
+      - ./data_mosquitto/config:/mosquitto/config
+      - ./data_mosquitto/data:/mosquitto/data
+      - ./data_mosquitto/certs:/mosquitto/certs:ro
+    command: mosquitto -c /mosquitto/config/mosquitto.conf
+    networks:
+      netlemp:
+        ipv4_address: ${IP_ADR:-172.100.0}.7
+    ports:
+     - 1883:1883
+ 
